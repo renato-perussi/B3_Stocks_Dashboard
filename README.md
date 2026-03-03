@@ -100,6 +100,8 @@ The application enables investors and analysts to monitor individual stock perfo
 
 ## Project Structure
 
+The workspace is intentionally lightweight; there are only a handful of Python modules and an `image` folder with a few screenshots and assets. The cache directory is generated automatically when the code runs.
+
 ```
 B3_Stocks_Dashboard/
 ├── streamlit_app.py          # Main application entry point
@@ -107,9 +109,11 @@ B3_Stocks_Dashboard/
 ├── config.py                 # Configuration settings and stock lists
 ├── requirements.txt          # Python dependencies
 ├── README.md                 # This documentation file
-├── image/                    # Directory for assets (logos, images)
-│   └── B3_Logo.png          # B3 exchange logo
-└── __pycache__/             # Python cache directory
+├── image/                    # Assets (screenshots, logos)
+│   ├── B3_Logo.png
+│   ├── B3_Stocks_Dashboard.png
+│   └── B3_Stocks_Dashboard_2.png
+└── __pycache__/             # Python bytecode cache (auto-generated)
 ```
 
 ---
