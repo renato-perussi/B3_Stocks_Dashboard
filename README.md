@@ -90,7 +90,7 @@ The application enables investors and analysts to monitor individual stock perfo
 
 5. **Run the application**
    ```bash
-   streamlit run streamlit_app.py
+   streamlit run app/main.py
    ```
 
 6. **Access the dashboard**
@@ -100,20 +100,43 @@ The application enables investors and analysts to monitor individual stock perfo
 
 ## Project Structure
 
-The workspace is intentionally lightweight; there are only a handful of Python modules and an `image` folder with a few screenshots and assets. The cache directory is generated automatically when the code runs.
+The application code is organized as a Python package under `app/`, with a clear separation between data access, analytics and presentation.
 
 ```
 B3_Stocks_Dashboard/
-├── streamlit_app.py          # Main application entry point
-├── services.py               # Business logic and data processing functions
-├── config.py                 # Configuration settings and stock lists
-├── requirements.txt          # Python dependencies
-├── README.md                 # This documentation file
-├── image/                    # Assets (screenshots, logos)
-│   ├── B3_Logo.png
-│   ├── B3_Stocks_Dashboard.png
-│   └── B3_Stocks_Dashboard_2.png
-└── __pycache__/             # Python bytecode cache (auto-generated)
+├── app/
+│   ├── main.py                # Application entry point
+│   ├── config.py              # PERIODS, STOCKS, STOCKS_DEFAULT
+│   ├── constants.py           # TRADING_DAYS_PER_YEAR, cache TTLs, defaults
+│   ├── models.py              # Dataclasses: TickerInfo, StockStatistics, ComparisonResult
+│   ├── data/
+│   │   └── yfinance_client.py # Single point of contact with yfinance
+│   ├── analytics/
+│   │   ├── statistics.py      # Pure single-stock statistics
+│   │   └── comparison.py      # Pure multi-stock comparison analytics
+│   ├── errors.py              # Friendly error UI for data failures
+│   └── ui/
+│       ├── formatters.py      # BRL / percentage display helpers
+│       ├── components/        # Reusable Streamlit components
+│       │   ├── about_popover.py
+│       │   ├── comparison_controls.py
+│       │   ├── correlation_heatmap.py
+│       │   ├── cumulative_returns_chart.py
+│       │   ├── header.py
+│       │   ├── horizontal_bar.py
+│       │   ├── price_chart.py
+│       │   ├── statistics_panel.py
+│       │   └── ticker_metrics_row.py
+│       └── views/             # Composed views
+│           ├── single_stock_view.py
+│           └── comparison_view.py
+├── .streamlit/
+│   └── config.toml
+├── image/                     # Assets (screenshots, logos)
+├── pyproject.toml             # Tooling config (ruff, mypy) and project metadata
+├── requirements.txt           # Runtime dependencies
+├── requirements-dev.txt       # Development dependencies (ruff, mypy)
+└── README.md
 ```
 
 ---
@@ -122,7 +145,7 @@ B3_Stocks_Dashboard/
 
 ### Stocks and Periods
 
-Edit `config.py` to customize the available stocks and time periods:
+Edit `app/config.py` to customize the available stocks and time periods:
 
 #### Available Periods
 ```python
@@ -151,106 +174,42 @@ The `STOCKS` list contains 88 companies from the IBOVESPA index (January 2026), 
 
 ## API Reference
 
-### Core Functions
+### Domain Models (`app/models.py`)
 
-#### `load_ticker_history(stock_selected, period)`
-Loads historical OHLCV data for a specified stock ticker over a given period.
+- **`TickerInfo`** — real-time quote and company profile fields.
+- **`StockStatistics`** — period statistics (volatility, return, prices, etc.).
+- **`ComparisonResult`** — bundle of DataFrames produced for a multi-stock analysis.
 
-**Parameters:**
-- `stock_selected` (str): Stock ticker symbol (e.g., 'PETR4.SA')
-- `period` (str): Time period (e.g., '1mo', '1y')
+### Data Layer (`app/data/yfinance_client.py`)
 
-**Returns:**
-- `pd.DataFrame`: Historical data with Date, Open, High, Low, Close, Volume columns
+#### `fetch_history(ticker, period)`
+Loads OHLCV history for a single ticker. Cached by Streamlit.
 
----
+#### `fetch_close_prices(period, tickers)`
+Loads close prices for multiple tickers aligned by date.
 
-#### `load_ticker_info_today(stock_selected)`
-Retrieves current price data and company information for a stock.
+#### `fetch_ticker_info(ticker)`
+Returns a `TickerInfo` dataclass with quote and company data. Cached with a 5-minute TTL.
 
-**Parameters:**
-- `stock_selected` (str): Stock ticker symbol
+### Analytics Layer (`app/analytics/`)
 
-**Returns:**
-- `dict`: Contains last price, previous close, percentage change, OHLC values, company name, business summary, website, sector, and industry
+#### `calculate_statistics(history) -> StockStatistics`
+Computes the eight statistics from an OHLCV history frame.
 
----
+#### `calculate_returns(close_prices) -> DataFrame`
+Daily percentage returns, first row zero-filled.
 
-#### `statistics_historical_data(df_stock)`
-Calculates statistical metrics from historical stock data.
+#### `cumulative_returns_period(returns) -> DataFrame`
+Cumulative returns over time, in percent.
 
-**Parameters:**
-- `df_stock` (pd.DataFrame): DataFrame with historical price data
+#### `cumulative_returns_ranking(returns) -> DataFrame`
+Total cumulative return per ticker, sorted descending.
 
-**Returns:**
-- `dict`: Contains volatility, cumulative return, high/low prices, mean, median, standard deviation, and coefficient of variation
+#### `annualized_volatility(returns) -> DataFrame`
+Annualized volatility per ticker, sorted descending.
 
----
-
-#### `df_stocks_close(period, stocks_list)`
-Fetches closing prices for multiple stocks over a specified period.
-
-**Parameters:**
-- `period` (str): Time period for analysis
-- `stocks_list` (list): List of stock ticker symbols
-
-**Returns:**
-- `pd.DataFrame`: Closing prices with dates as index and tickers as columns
-
----
-
-#### `df_returns(df_close_prices)`
-Calculates daily percentage returns from closing prices.
-
-**Parameters:**
-- `df_close_prices` (pd.DataFrame): DataFrame with closing prices
-
-**Returns:**
-- `pd.DataFrame`: Daily percentage returns
-
----
-
-#### `df_stocks_returns_ranking(df_close_returns)`
-Ranks stocks by cumulative returns in descending order.
-
-**Parameters:**
-- `df_close_returns` (pd.DataFrame): DataFrame with daily returns
-
-**Returns:**
-- `pd.DataFrame`: Ranked stocks by cumulative return
-
----
-
-#### `df_stocks_returns_period(df_close_returns)`
-Calculates cumulative returns over time for visualization.
-
-**Parameters:**
-- `df_close_returns` (pd.DataFrame): DataFrame with daily returns
-
-**Returns:**
-- `pd.DataFrame`: Cumulative returns for each date and stock
-
----
-
-#### `df_annualized_volatility(df_close_returns)`
-Calculates and ranks stocks by annualized volatility (252 trading days).
-
-**Parameters:**
-- `df_close_returns` (pd.DataFrame): DataFrame with daily returns
-
-**Returns:**
-- `pd.DataFrame`: Stocks ranked by annualized volatility
-
----
-
-#### `df_coefficient_variation(df_close_prices)`
-Calculates and ranks stocks by coefficient of variation (price stability).
-
-**Parameters:**
-- `df_close_prices` (pd.DataFrame): DataFrame with closing prices
-
-**Returns:**
-- `pd.DataFrame`: Stocks ranked by coefficient of variation
+#### `coefficient_variation(close_prices) -> DataFrame`
+Coefficient of variation per ticker, sorted descending.
 
 ---
 
@@ -298,10 +257,11 @@ Calculates and ranks stocks by coefficient of variation (price stability).
 
 ## Performance Optimization
 
-The application implements Streamlit's `@st.cache_data` decorator for data functions to:
+The application implements Streamlit's `@st.cache_data` decorator for the data layer to:
 - Reduce API calls to yfinance
 - Improve dashboard responsiveness
 - Cache historical data between reruns
+- Refresh quote data every 5 minutes (`CACHE_TTL_INFO`)
 
 ---
 
@@ -339,16 +299,38 @@ The application implements Streamlit's `@st.cache_data` decorator for data funct
 
 To extend or modify the dashboard:
 
-1. Add new stocks to `config.py`
-2. Create additional analysis functions in `services.py` with appropriate docstrings
-3. Integrate new visualizations in `streamlit_app.py`
-4. Test functionality with multiple time periods and stock combinations
+1. Add new stocks to `app/config.py`
+2. Add new analytics functions under `app/analytics/`
+3. Add new Streamlit components under `app/ui/components/`
+4. Compose new views in `app/ui/views/` and call them from `app/main.py`
+5. Test functionality with multiple time periods and stock combinations
+
+### Development
+
+Install development dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Run the linter and formatter:
+
+```bash
+ruff check .
+ruff format .
+```
+
+Run static type checking:
+
+```bash
+mypy app/
+```
 
 ---
 
 ## Requirements
 
-See `requirements.txt` for the complete dependency list. Key packages include:
+See `requirements.txt` for the complete runtime dependency list. Key packages include:
 
 - **streamlit**: Web application framework
 - **pandas**: Data manipulation and analysis
@@ -359,7 +341,7 @@ See `requirements.txt` for the complete dependency list. Key packages include:
 
 To install all dependencies:
 ```bash
-pip install pandas streamlit yfinance matplotlib seaborn numpy
+pip install -r requirements.txt
 ```
 
 ---
@@ -404,9 +386,10 @@ This dashboard is provided for informational and analytical purposes only. It sh
 
 ## Version History
 
+- **v1.1** (June 2026): Refactored into a layered `app/` package with dataclass models, dedicated data and analytics layers, reusable UI components, error handling, and tooling (ruff + mypy).
 - **v1.0** (January 2026): Initial release with individual stock analysis, multi-stock comparison, and statistical metrics
 
 ---
 
-**Last Updated**: January 2026
+**Last Updated**: June 2026
 
