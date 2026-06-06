@@ -215,25 +215,28 @@ Coefficient of variation per ticker, sorted descending.
 
 ## Usage Guide
 
-### 1. Analyze a Single Stock
+### 1. Analyze a Single Stock (Tab 1)
 
-1. Select a stock ticker from the **Stock Ticker** dropdown in the left panel
-2. Choose a time period using the **Period** pills (1mo, 3mo, 6mo, 1y, etc.)
-3. View real-time metrics in the top section:
+The dashboard opens with the B3 logo at the top and two tabs: **Single Stock** and **Multiple Stocks**.
+
+1. Open the **Single Stock** tab
+2. Select a stock ticker from the **Stock Ticker** dropdown in the left panel
+3. Choose a time period using the **Period** pills (1mo, 3mo, 6mo, 1y, etc.)
+4. View real-time metrics in the top section:
    - Last Price and Daily Change
    - Open Price, Day High, Day Low
    - Previous Close Price
-4. Explore the **About** section for company information
-5. Review statistical metrics including:
+5. Explore the **About** section for company information
+6. Review statistical metrics including:
    - Cumulative Return
    - Annualized Volatility
    - Average and Median Prices
    - Coefficient of Variation
-6. Analyze the price chart to visualize historical trends
+7. Analyze the price chart to visualize historical trends
 
-### 2. Compare Multiple Stocks
+### 2. Compare Multiple Stocks (Tab 2)
 
-1. Scroll down to the **Statistical Analyses** section
+1. Open the **Multiple Stocks** tab
 2. Select a time period for comparison
 3. Choose **at least two stocks** from the multiselect box
 4. View automatically generated analyses:

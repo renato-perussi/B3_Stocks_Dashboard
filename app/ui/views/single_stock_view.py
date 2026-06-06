@@ -11,7 +11,6 @@ from app.data.yfinance_client import fetch_history, fetch_ticker_info
 from app.errors import handle_data_errors
 from app.models import TickerInfo
 from app.ui.components.about_popover import render_about
-from app.ui.components.header import render_header
 from app.ui.components.price_chart import render_price_chart
 from app.ui.components.statistics_panel import render_statistics
 from app.ui.components.ticker_metrics_row import render_ticker_metrics
@@ -19,12 +18,10 @@ from app.ui.components.ticker_metrics_row import render_ticker_metrics
 
 @handle_data_errors("single stock view")
 def render_single_stock_view() -> None:
-    """Render the upper section: single ticker analysis."""
+    """Render the single ticker analysis tab."""
     left_col, right_col = st.columns([0.25, 0.75])
 
     with left_col:
-        render_header()
-
         period, ticker, info = _render_controls()
         history = fetch_history(ticker, period)
         stats = calculate_statistics(history)

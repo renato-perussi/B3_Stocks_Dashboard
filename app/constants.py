@@ -12,7 +12,7 @@ PAGE_TITLE: str = "B3 - Stocks Dashboard"
 
 LOGO_PATH: str = "image/B3_Logo.png"
 
-CHART_HEIGHT_SINGLE: int = 685
+CHART_HEIGHT_SINGLE: int = 592
 CHART_HEIGHT_COMPARISON: int = 500
 
 CURRENCY_PREFIX: str = "R$ "

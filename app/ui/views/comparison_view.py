@@ -17,19 +17,22 @@ from app.ui.components.horizontal_bar import render_horizontal_bar
 
 
 def render_comparison_view() -> None:
-    """Render the Statistical Analyses section."""
-    st.markdown("## Statistical Analyses")
+    """Render the multi-stock comparison tab."""
+    left_col, right_col = st.columns([0.25, 0.75])
 
-    selection = render_comparison_controls()
-    if len(selection.tickers) < 2:
-        st.warning("Please, select at least two stocks for analysis.")
-        return
+    with left_col:
+        selection = render_comparison_controls()
 
-    result = _build_comparison(selection.period, selection.tickers)
-    if result is None:
-        return
+    with right_col:
+        if len(selection.tickers) < 2:
+            st.warning("Please, select at least two stocks for analysis.")
+            return
 
-    _render_charts(result)
+        result = _build_comparison(selection.period, selection.tickers)
+        if result is None:
+            return
+
+        _render_charts(result)
 
 
 @handle_data_errors("multi-stock comparison")
