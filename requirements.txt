@@ -1,5 +1,6 @@
 altair==6.0.0
 asarPy==1.0.1
+ast_serialize==0.5.0
 attrs==25.4.0
 beautifulsoup4==4.14.3
 blinker==1.9.0
@@ -20,16 +21,21 @@ Jinja2==3.1.6
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 kiwisolver==1.4.9
+librt==0.11.0
 MarkupSafe==3.0.3
 matplotlib==3.10.8
 multitasking==0.0.12
+mypy==2.1.0
+mypy_extensions==1.1.0
 narwhals==2.15.0
 numpy==2.4.2
 packaging==26.0
 pandas==2.3.3
+pathspec==1.1.1
 peewee==3.19.0
 pillow==12.1.0
 platformdirs==4.5.1
+plotly==6.8.0
 protobuf==6.33.4
 pyarrow==23.0.0
 pycparser==3.0
@@ -40,6 +46,7 @@ pytz==2025.2
 referencing==0.37.0
 requests==2.32.5
 rpds-py==0.30.0
+ruff==0.15.16
 seaborn==0.13.2
 six==1.17.0
 smmap==5.0.2

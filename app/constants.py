@@ -10,7 +10,7 @@ DEFAULT_STOCK: str = "PETR4.SA"
 
 PAGE_TITLE: str = "B3 - Stocks Dashboard"
 
-LOGO_PATH: str = "image/B3_Logo.png"
+LOGO_PATH: str = "images/B3_Logo.png"
 
 CHART_HEIGHT_SINGLE: int = 592
 CHART_HEIGHT_COMPARISON: int = 500
