@@ -1,1 +1,1 @@
-"""Top-level Streamlit views (composed from components)."""
+"""Top-level views."""

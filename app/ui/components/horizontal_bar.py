@@ -1,4 +1,4 @@
-"""Generic horizontal bar chart used for ranking views."""
+"""Ranking bar chart."""
 
 from __future__ import annotations
 
@@ -15,17 +15,17 @@ def render_horizontal_bar(
     value_column: str,
     x_label: str,
 ) -> None:
-    """Render a horizontal bar chart sorted by ``value_column``."""
-    with st.container(border=True, height=CHART_HEIGHT_COMPARISON, width="stretch"):
-        st.markdown(f"### {title}")
+    """Show horizontal ranking bar."""
+    with st.container(border=True, height=CHART_HEIGHT_COMPARISON, width='stretch'):
+        st.markdown(f'### {title}')
         st.bar_chart(
             data=data,
-            x="Ticker",
+            x='Ticker',
             y=value_column,
             horizontal=True,
             sort=False,
-            y_label="Tickers",
+            y_label='Tickers',
             x_label=x_label,
-            height="stretch",
-            width="stretch",
+            height='stretch',
+            width='stretch',
         )

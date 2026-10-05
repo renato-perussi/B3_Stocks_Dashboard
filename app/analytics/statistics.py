@@ -1,4 +1,4 @@
-"""Pure statistical calculations for a single stock's price history."""
+"""Pure stats for one stock history."""
 
 from __future__ import annotations
 
@@ -9,18 +9,16 @@ from app.models import StockStatistics
 
 
 def calculate_statistics(history: pd.DataFrame) -> StockStatistics:
-    """Compute the standard set of statistics from an OHLCV history frame."""
-    returns = history["Close"].pct_change().fillna(0)
+    """Build stats from OHLC history."""
+    returns = history['Close'].pct_change().fillna(0)
     volatility = returns.std() * (TRADING_DAYS_PER_YEAR**0.5) * 100
     cumulative_return = ((1 + returns).prod() - 1) * 100
-
-    median_price = history["Close"].median()
-    mean_price = history["Close"].mean()
-    standard_deviation = history["Close"].std()
+    median_price = history['Close'].median()
+    mean_price = history['Close'].mean()
+    standard_deviation = history['Close'].std()
     coefficient_variation = (standard_deviation / mean_price) * 100
-    high_price = history["High"].max()
-    low_price = history["Low"].min()
-
+    high_price = history['High'].max()
+    low_price = history['Low'].min()
     return StockStatistics(
         volatility=volatility,
         cumulative_return=cumulative_return,

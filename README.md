@@ -1,438 +1,202 @@
 # B3 Stocks Dashboard
 
+![Python](https://img.shields.io/badge/python-3.12%2B-blue)
+![Streamlit](https://img.shields.io/badge/streamlit-1.54-red)
+![Tests](https://img.shields.io/badge/tests-pytest-green)
+![Lint](https://img.shields.io/badge/lint-ruff-black)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
 ## Overview
 
-The **B3 Stocks Dashboard** is an interactive web application for analyzing Brazilian stock market data from the **B3 (Brasil, Bolsa, Balcão)** exchange. Built with [Streamlit](https://streamlit.io), it provides real-time stock quotes, historical analysis, and comparative metrics for tracking investment performance and market trends.
-
-The application enables investors and analysts to monitor individual stock performance, analyze historical statistics, and conduct portfolio comparisons with detailed visualizations — including price charts, correlation heatmaps, and volatility metrics — all sourced from [Yahoo Finance](https://finance.yahoo.com/) via the [`yfinance`](https://pypi.org/project/yfinance/) library.
+Interactive Streamlit dashboard for Brazilian B3 stocks. It shows real-time quotes, historical trends, and multi-stock comparisons using Yahoo Finance data.
 
 <p align="center">
-  <img src="images/B3_Stocks_Dashboard.png" alt="B3 Stocks Dashboard - Single Stock tab" width="49%">
-  <img src="images/B3_Stocks_Dashboard_2.png" alt="B3 Stocks Dashboard - Multiple Stocks tab" width="49%">
+  <img src="docs/screenshots/B3_Stocks_Dashboard.png" alt="Single Stock tab" width="100%">
 </p>
 
----
+<p align="center">
+  <img src="docs/screenshots/B3_Stocks_Dashboard_2.png" alt="Multiple Stocks tab" width="100%">
+</p>
 
 ## Features
 
-### Single Stock Analysis (`Single Stock` tab)
-- **Real-time quote row**: ticker label, intraday change %, last price, previous close, open, day high, day low — all formatted in BRL.
-- **Historical close-price chart**: interactive Streamlit line chart over the selected period.
-- **Period statistics panel** (2×4 grid): cumulative return, average price, standard deviation, high price, annualized volatility, median price, coefficient of variation, low price.
-- **About popover**: company long name, business summary, website, sector, and industry.
-- **Period selector**: pill control with `1mo`, `3mo`, `6mo`, `1y`, `2y`, `5y`, `10y`, `ytd`.
-- **Ticker selector**: full IBOVESPA universe (87+ tickers) from `app/config.py`.
+Single Stock tab:
 
-### Multiple Stocks Comparison (`Multiple Stocks` tab)
-- **Cumulative returns time-series chart** for all selected tickers.
-- **Correlation heatmap** (seaborn) of pairwise daily-return correlations.
-- **Three ranking horizontal bars**, all sorted descending:
-  - Cumulative return (%)
-  - Annualized volatility (%)
-  - Coefficient of variation (%)
-- **Period selector** and **multi-select ticker box** (defaults to a quick-analysis basket: `PETR4.SA`, `VALE3.SA`, `ITUB4.SA`, `BBAS3.SA`, `ABEV3.SA`, `BBDC4.SA`).
-- **Guardrails**: friendly warning when fewer than 2 tickers are selected, and graceful error UI on data-fetch failures.
+- Live quote row with change percent and OHLC prices in BRL.
+- Close price history chart for the selected period.
+- Eight metric stats panel with volatility and returns.
+- Company profile popover with sector and website.
 
-### Application-wide
-- **Layered architecture**: data, analytics, and UI are isolated under `app/data/`, `app/analytics/`, and `app/ui/`.
-- **Domain models** as frozen dataclasses (`TickerInfo`, `StockStatistics`, `ComparisonResult`).
-- **Friendly error handling** via a `handle_data_errors` decorator that shows inline Streamlit errors with collapsible exception details.
-- **Streamlit caching** to minimize calls to `yfinance`.
+Multiple Stocks tab:
 
----
+- Cumulative returns chart for all selected tickers.
+- Correlation heatmap of daily returns.
+- Ranked bars for return, volatility, and variation.
+- Guardrail warning when fewer than two tickers are picked.
 
-## Technical Stack
+Platform:
 
-| Component | Technology |
-|-----------|-----------|
-| **Frontend / app framework** | Streamlit |
-| **Data source** | yfinance (Yahoo Finance) |
-| **Data processing** | Pandas, NumPy |
-| **Visualization** | Matplotlib, Seaborn, Streamlit native charts |
-| **Programming language** | Python 3.10+ |
-| **Tooling** | ruff (lint + format), mypy (static type checking) |
+- Layered architecture with pure analytics and isolated UI.
+- Frozen dataclass models for type safety.
+- Friendly error UI with expandable details.
+- Streamlit caching for fast reloads.
 
-Runtime dependencies and version ranges are declared in `pyproject.toml` and pinned in `requirements.txt`.
+## Tech Stack
 
----
-
-## Installation
-
-### Prerequisites
-- **Python 3.10 or higher** (matches `pyproject.toml` `requires-python`)
-- `pip` (Python package manager)
-
-### Setup Instructions
-
-1. **Clone or download the project**
-   ```bash
-   cd B3_Stocks_Dashboard
-   ```
-
-2. **Create a virtual environment** (recommended)
-   ```bash
-   python -m venv .venv
-   ```
-
-3. **Activate the virtual environment**
-   - On Windows:
-     ```bash
-     .venv\Scripts\activate
-     ```
-   - On macOS/Linux:
-     ```bash
-     source .venv/bin/activate
-     ```
-
-4. **Install runtime dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. **(Optional) Install development tools** — ruff + mypy:
-   ```bash
-   pip install -r requirements-dev.txt
-   ```
-
-6. **Run the application**
-   ```bash
-   streamlit run app/main.py
-   ```
-
-7. **Open the dashboard**
-   Navigate to <http://localhost:8501> in your browser.
-
----
+| Layer | Technology |
+| ----- | ---------- |
+| App | Streamlit 1.54 |
+| Data | yfinance, pandas, numpy |
+| Charts | Streamlit charts, matplotlib, seaborn |
+| Language | Python 3.12+ |
+| Quality | pytest, pytest-cov, ruff, mypy |
 
 ## Project Structure
 
-The application code is organized as a Python package under `app/`, with a clear separation between data access, analytics, and presentation. UI elements are split into reusable **components** and composed **views**.
-
-```
+```text
 B3_Stocks_Dashboard/
 ├── app/
-│   ├── __init__.py
-│   ├── main.py                # Application entry point (run with `streamlit run app/main.py`)
-│   ├── config.py              # PERIODS, STOCKS, STOCKS_DEFAULT (IBOVESPA universe)
-│   ├── constants.py           # TRADING_DAYS_PER_YEAR, cache TTLs, defaults, chart heights, LOGO_PATH
-│   ├── models.py              # Frozen dataclasses: TickerInfo, StockStatistics, ComparisonResult
-│   ├── errors.py              # `show_data_error` / `handle_data_errors` decorator for the UI
-│   ├── data/
-│   │   └── yfinance_client.py # Single point of contact with yfinance
-│   ├── analytics/
-│   │   ├── statistics.py      # Pure single-stock statistics
-│   │   └── comparison.py      # Pure multi-stock comparison analytics
-│   └── ui/
-│       ├── formatters.py      # BRL / percentage display helpers
-│       ├── components/        # Reusable Streamlit widgets
-│       │   ├── about_popover.py
-│       │   ├── comparison_controls.py
-│       │   ├── correlation_heatmap.py
-│       │   ├── cumulative_returns_chart.py
-│       │   ├── header.py
-│       │   ├── horizontal_bar.py
-│       │   ├── price_chart.py
-│       │   ├── statistics_panel.py
-│       │   └── ticker_metrics_row.py
-│       └── views/             # Composed views (one per tab)
-│           ├── single_stock_view.py
-│           └── comparison_view.py
-├── .streamlit/
-│   └── config.toml            # Theme (light base, B3-inspired primary color)
-├── images/                    # Assets (B3 logo, dashboard screenshots)
-├── pyproject.toml             # Project metadata + tooling config (ruff, mypy)
-├── requirements.txt           # Pinned runtime dependencies
-├── requirements-dev.txt       # Development dependencies (ruff, mypy)
-├── .gitignore
+│   ├── main.py
+│   ├── config.py
+│   ├── constants.py
+│   ├── models.py
+│   ├── errors.py
+│   ├── data/yfinance_client.py
+│   ├── analytics/statistics.py
+│   ├── analytics/comparison.py
+│   ├── ui/formatters.py
+│   ├── ui/components/
+│   └── ui/views/
+├── tests/
+├── docs/screenshots/
+├── .streamlit/config.toml
+├── pyproject.toml
+├── requirements.txt
+├── requirements-dev.txt
+├── LICENSE
 └── README.md
 ```
 
----
+## Installation
 
-## Configuration
-
-### Stocks and Periods
-
-All static configuration lives in `app/config.py`. Edit it to customize the selectable universe and the default period.
-
-#### Available Periods
-```python
-PERIODS: list[str] = ["1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd"]
-```
-
-#### Default Stocks (Quick Analysis)
-```python
-STOCKS_DEFAULT: list[str] = [
-    "PETR4.SA", "VALE3.SA", "ITUB4.SA",
-    "BBAS3.SA", "ABEV3.SA", "BBDC4.SA",
-]
-```
-
-#### Complete Stock List
-The `STOCKS` list contains **87 companies from the IBOVESPA index** (snapshot sourced from the [B3 IBOVESPA composition page](https://www.b3.com.br/pt_br/market-data-e-indices/indices/indices-amplos/indice-ibovespa-ibovespa-composicao-da-carteira.htm)), spanning sectors such as:
-
-- **Energy / Materials**: `PETR3.SA`, `PETR4.SA`, `VALE3.SA`, `PRIO3.SA`, `CSAN3.SA`, `SUZB3.SA`, `GGBR4.SA`
-- **Banking / Financials**: `ITUB4.SA`, `BBAS3.SA`, `BBDC3.SA`, `BBDC4.SA`, `SANB11.SA`, `BPAC11.SA`, `BBSE3.SA`
-- **Consumer Goods**: `ABEV3.SA`, `ASAI3.SA`, `LREN3.SA`, `MGLU3.SA`, `PCAR3.SA`
-- **Utilities**: `CMIG4.SA`, `CPLE3.SA`, `CPFE3.SA`, `SBSP3.SA`, `EGIE3.SA`, `ELET3.SA` family
-- **Healthcare**: `RDOR3.SA`, `HAPV3.SA`, `FLRY3.SA`, `PSSA3.SA`
-- **Industrials / Real Estate**: `WEGE3.SA`, `CYRE3.SA`, `MRVE3.SA`, `CURY3.SA`, `RAIL3.SA`
-- **Telecom / Tech**: `VIVT3.SA`, `TIMS3.SA`, `TOTS3.SA`
-
-> **Important**: All stock tickers must include the `.SA` suffix for B3-listed companies.
-
-### Theme
-
-The Streamlit theme is defined in `.streamlit/config.toml` (light base, B3-inspired primary color `#003475`). Adjust it there to re-skin the dashboard.
-
-### Logo
-
-`app/constants.py` exposes `LOGO_PATH` (default: `images/B3_Logo.png`) which `app/ui/components/header.py` renders at the top of every page. Replace the file at that path to swap the brand mark.
-
----
-
-## Architecture
-
-```
-┌─────────────────────────┐
-│       app/main.py       │   Streamlit entry point
-└────────────┬────────────┘
-             │
-   ┌─────────▼──────────┐
-   │   app/ui/views/    │   Composed views (one per tab)
-   └─────────┬──────────┘
-             │
-   ┌─────────▼──────────┐    ┌────────────────────┐
-   │  app/ui/components/│───▶│ app/ui/formatters  │
-   └─────────┬──────────┘    └────────────────────┘
-             │
-   ┌─────────▼──────────┐    ┌────────────────────┐
-   │    app/analytics/  │───▶│  app/models.py     │   Frozen dataclasses
-   └─────────┬──────────┘    └────────────────────┘
-             │
-   ┌─────────▼──────────┐    ┌────────────────────┐
-   │ app/data/          │───▶│   yfinance API     │
-   │ yfinance_client.py │    └────────────────────┘
-   └────────────────────┘
-```
-
-- **Data layer** (`app/data/`) is the only place that talks to `yfinance`. All network I/O is centralized here so it can be cached, mocked, or swapped without touching the rest of the codebase.
-- **Analytics layer** (`app/analytics/`) is pure: takes a DataFrame in, returns a DataFrame (or a `StockStatistics` value object) out. No I/O, no Streamlit calls.
-- **UI layer** (`app/ui/`) is the only place that imports `streamlit`. Components are reusable widgets; views compose them into full tabs.
-- **Errors** (`app/errors.py`) provide a decorator (`@handle_data_errors`) that converts any uncaught data-layer exception into a friendly inline Streamlit error.
-
----
-
-## API Reference
-
-### Domain Models (`app/models.py`)
-
-- **`TickerInfo`** — frozen dataclass with real-time quote fields (`last_price`, `previous_close`, `pct_today`, `open_price`, `day_high`, `day_low`) and company profile fields (`long_name`, `summary`, `web_site`, `sector`, `industry`).
-- **`StockStatistics`** — frozen dataclass holding eight per-period metrics: `volatility`, `cumulative_return`, `high_price`, `low_price`, `median_price`, `mean_price`, `standard_deviation`, `coefficient_variation`.
-- **`ComparisonResult`** — frozen dataclass bundling the `close_prices`, `returns`, `cumulative_returns_period`, `cumulative_returns_ranking`, `correlation_matrix`, `annualized_volatility`, and `coefficient_variation` DataFrames produced for a multi-stock analysis.
-
-### Data Layer (`app/data/yfinance_client.py`)
-
-| Function | Description | Cache |
-|----------|-------------|-------|
-| `fetch_history(ticker: str, period: str) -> pd.DataFrame` | Loads OHLCV history for a single ticker, with a `Date` column of Python `date` objects and numeric columns rounded to 2 decimals. | `@st.cache_data` (no TTL) |
-| `fetch_close_prices(period: str, tickers: list[str]) -> pd.DataFrame` | Loads close-price series for multiple tickers, aligned by date. | `@st.cache_data` (no TTL) |
-| `fetch_ticker_info(ticker: str) -> TickerInfo` | Returns a populated `TickerInfo` (quote via `fast_info`, profile via `info`). | `@st.cache_data(ttl=CACHE_TTL_INFO)` (default 5 min) |
-
-### Analytics Layer (`app/analytics/`)
-
-`statistics.py`
-
-- `calculate_statistics(history: pd.DataFrame) -> StockStatistics` — computes the eight metrics of `StockStatistics` from an OHLCV history frame.
-
-`comparison.py`
-
-- `calculate_returns(close_prices: pd.DataFrame) -> pd.DataFrame` — daily percentage returns; first row zero-filled.
-- `cumulative_returns_period(returns: pd.DataFrame) -> pd.DataFrame` — cumulative returns over time, in percent.
-- `cumulative_returns_ranking(returns: pd.DataFrame) -> pd.DataFrame` — total cumulative return per ticker, sorted descending.
-- `annualized_volatility(returns: pd.DataFrame) -> pd.DataFrame` — annualized volatility per ticker, sorted descending (using `TRADING_DAYS_PER_YEAR = 252`).
-- `coefficient_variation(close_prices: pd.DataFrame) -> pd.DataFrame` — coefficient of variation per ticker, sorted descending.
-
----
-
-## Usage Guide
-
-### 1. Single Stock tab
-
-1. Open the **Single Stock** tab.
-2. In the left controls container, pick a **Period** (pill control) and a **Stock Ticker** (dropdown over the IBOVESPA universe).
-3. Click the **About** popover to read the company's profile (long name, business summary, website, sector, industry).
-4. Review the **real-time metrics row** at the top-right:
-   - **Ticker** label
-   - **Change %** (intraday)
-   - **Last Price**
-   - **Previous Close**
-   - **Open Price**
-   - **Day High**
-   - **Day Low**
-5. Review the **Statistics for the period** panel (2×4 grid):
-   - Left column: Cumulative Return, Average Price, Standard Deviation, High Price.
-   - Right column: Annualized Volatility, Median Price, Coefficient Variation, Low Price.
-6. Inspect the **close-price line chart** to visualize historical trends over the selected period.
-
-### 2. Multiple Stocks tab
-
-1. Open the **Multiple Stocks** tab.
-2. In the left controls container, pick a **Period** and choose two or more tickers from the **Stock Tickers** multi-select (defaults to a quick-analysis basket).
-3. The right pane shows, in order:
-   - **Cumulative Returns (%)** — time-series line chart.
-   - **Correlation Heatmap** — seaborn heatmap, annotated with pairwise Pearson correlations in the range `[-1, 1]`.
-   - **Cumulative Returns (%)** ranking bar.
-   - **Annualized Volatility (%)** ranking bar.
-   - **Coefficient Variation (%)** ranking bar.
-
-A warning is shown if fewer than two tickers are selected.
-
-### 3. Interpreting the Metrics
-
-- **Cumulative Return** — total percentage gain/loss over the period.
-- **Annualized Volatility** — standard deviation of daily returns scaled to one year (`sqrt(252)`).
-- **Coefficient of Variation** — risk per unit of mean price; lower means a more stable price series.
-- **Correlation** — pairwise linear relationship between daily returns:
-  - Close to `+1` — the stocks move together.
-  - Close to `-1` — the stocks move in opposite directions.
-  - Close to `0` — no linear relationship.
-
----
-
-## Performance & Caching
-
-The data layer uses Streamlit's `@st.cache_data` decorator to minimize calls to Yahoo Finance:
-
-- `fetch_history` and `fetch_close_prices` are cached for the lifetime of the Streamlit session.
-- `fetch_ticker_info` is cached with a **5-minute TTL** (`CACHE_TTL_INFO = 300` in `app/constants.py`) so quotes refresh without hammering the API.
-
-To clear the cache during development, press `C` inside the app or run:
+Prerequisites: Python 3.12+, pip.
 
 ```bash
-streamlit cache clear
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app/main.py
 ```
 
----
+Open <http://localhost:8501> in your browser.
 
-## Data Source
-
-- **Primary source**: [yfinance](https://pypi.org/project/yfinance/) — unofficial Yahoo Finance API client.
-- **Market**: B3 (Brasil, Bolsa, Balcão).
-- **Data type**: Historical OHLCV prices, real-time quote snapshot, and company profile metadata.
-- **Update frequency**: Real-time for the quote (subject to Yahoo Finance's update cadence and B3 trading hours); historical data is appended daily.
-
----
-
-## Limitations
-
-1. **Market hours** — historical and quote data only move during B3 trading hours.
-2. **Delisted stocks** — stocks that have been delisted may return incomplete or empty data.
-3. **API rate limiting** — Yahoo Finance may rate-limit or temporarily block clients that make excessive requests.
-4. **Historical depth** — full historical depth varies by ticker (typically 10+ years for active IBOVESPA constituents).
-
----
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| **"Please, select at least two stocks for analysis"** | Pick 2+ tickers in the **Stock Tickers** multi-select. |
-| **"Could not load data for ..." banner in the UI** | Click the **Error details** expander for the underlying exception, then check your internet connection and try again. |
-| **Empty chart for a ticker** | Some tickers have gaps in their history; try a different period or a different stock. |
-| **Stale quotes** | The `TickerInfo` payload is cached for 5 minutes. Press `C` in the app or run `streamlit cache clear` to force a refresh. |
-| **Logo not visible** | Make sure `images/B3_Logo.png` exists — `app/constants.py::LOGO_PATH` points to it. |
-| **Slow first load** | The first run downloads historical data for every selected ticker; subsequent interactions are served from Streamlit's cache. |
-| **Stock not found** | Ensure the ticker includes the `.SA` suffix (e.g. `'PETR4.SA'`, not `'PETR4'`). |
-| **Mypy / ruff errors after editing** | Run `ruff format . && ruff check . && mypy app/` (see *Development* below). |
-
----
-
-## Development
-
-Install the dev extras:
+For development tools:
 
 ```bash
 pip install -r requirements-dev.txt
 ```
 
-### Lint and format
+## Usage
+
+Single Stock:
+
+1. Open Single Stock tab.
+2. Pick a period and ticker.
+3. Check About for company info.
+4. Review quote row and stats panel.
+5. Inspect price chart.
+
+Multiple Stocks:
+
+1. Open Multiple Stocks tab.
+2. Pick a period and two or more tickers.
+3. Review cumulative chart and heatmap.
+4. Compare ranking bars.
+
+## Configuration
+
+Periods live in `app/config.py`:
+
+```python
+PERIODS = ['1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd']
+```
+
+Universe has 87 IBOVESPA tickers with `.SA` suffix. Defaults use six liquid names for quick analysis.
+
+Theme lives in `.streamlit/config.toml`. Logo path is `docs/screenshots/B3_Logo.png` via `app/constants.py`.
+
+## API Reference
+
+Models:
+
+- `TickerInfo`: quote plus profile fields.
+- `StockStatistics`: eight period metrics.
+- `ComparisonResult`: bundle of compare frames.
+
+Data:
+
+- `fetch_history(ticker, period)`: OHLC history with Date column.
+- `fetch_close_prices(period, tickers)`: aligned close prices.
+- `fetch_ticker_info(ticker)`: live quote and profile.
+
+Analytics:
+
+- `calculate_statistics(history)`: stats from OHLC frame.
+- `calculate_returns(prices)`: daily returns, first row zero.
+- `cumulative_returns_period(returns)`: cumulative percent series.
+- `cumulative_returns_ranking(returns)`: sorted total returns.
+- `annualized_volatility(returns)`: sorted yearly volatility.
+- `coefficient_variation(prices)`: sorted variation values.
+
+## Testing and Linting
+
 ```bash
+python -m pytest -v
+python -m pytest --cov=app
 ruff check .
-ruff format .
+ruff format --check .
+python -m mypy app/
 ```
 
-### Static type checking
+Tests use real logic with mocked yfinance. Analytics and formatters have full unit coverage.
+
+## Caching and Performance
+
+`fetch_history` and `fetch_close_prices` use session cache. `fetch_ticker_info` uses 5 minute TTL. Analytics avoids N+1 work with vectorized pandas. Charts use fixed heights from constants.
+
+Clear cache with:
+
 ```bash
-mypy app/
+streamlit cache clear
 ```
 
-### Adding new functionality
-1. **New ticker** → add it to `STOCKS` in `app/config.py`.
-2. **New single-stock metric** → add a field to `StockStatistics` in `app/models.py`, compute it in `app/analytics/statistics.py::calculate_statistics`, and display it in `app/ui/components/statistics_panel.py`.
-3. **New multi-stock metric** → add a pure function to `app/analytics/comparison.py`, surface it in `app/ui/views/comparison_view.py` (use `app/ui/components/horizontal_bar.py` for a ranking bar).
-4. **New UI widget** → drop a new module into `app/ui/components/` and call it from the relevant view.
-5. **New tab** → add a view under `app/ui/views/` and wire it up in `app/main.py` (currently `st.tabs([...])`).
+## Troubleshooting
 
----
-
-## Requirements
-
-Runtime and dev dependencies are declared in `pyproject.toml` and pinned in `requirements.txt` / `requirements-dev.txt`. The core packages are:
-
-- **streamlit** — web application framework
-- **pandas** — data manipulation and analysis
-- **numpy** — numerical computing
-- **yfinance** — financial data fetching
-- **matplotlib** — plotting library (used by the seaborn heatmap)
-- **seaborn** — statistical data visualization
-
-Install everything with:
-```bash
-pip install -r requirements.txt
-```
-
----
+| Issue | Fix |
+| ----- | --- |
+| Select at least two stocks | Pick 2+ tickers in multiselect. |
+| Could not load data banner | Check connection, open Error details. |
+| Empty chart | Try another period or ticker. |
+| Stale quote | Wait 5 minutes or clear cache. |
+| Logo missing | Verify `docs/screenshots/B3_Logo.png` exists. |
+| Slow first load | First fetch downloads history, later hits cache. |
+| Ticker not found | Use `.SA` suffix, example `PETR4.SA`. |
 
 ## Roadmap
 
-Potential features for future versions:
-
-- Real-time alerts for price thresholds
-- Portfolio optimization recommendations
-- Technical indicators (Moving Averages, RSI, MACD)
-- Machine learning-based price predictions
-- Export reports to PDF/Excel
-- User authentication and saved preferences
-- Mobile-responsive design improvements
-- Historical correlation analysis
-- Risk assessment dashboard
-
----
+- Technical indicators like RSI and MACD.
+- Price alerts and portfolio export.
+- Saved user preferences.
+- Risk dashboard and predictions.
 
 ## License
 
-This project is released under the **MIT License** (see `pyproject.toml`).
-
----
+MIT License. See `LICENSE` for details.
 
 ## Author
 
-**Renato** — see `pyproject.toml` `[project.authors]`.
-
----
+Renato. See `[project.authors]` in `pyproject.toml`.
 
 ## Disclaimer
 
-This dashboard is provided for informational and analytical purposes only. It is **not** financial advice. Always conduct thorough research and consult with qualified financial professionals before making investment decisions. Past performance does not guarantee future results. The author is not responsible for any financial losses resulting from the use of this tool.
-
----
-
-## Version History
-
-- **v1.1.0** (June 2026) — Refactored into a layered `app/` package: frozen dataclass models (`TickerInfo`, `StockStatistics`, `ComparisonResult`), dedicated data and analytics layers, reusable UI components, friendly error handling, and tooling (ruff + mypy). Added Streamlit theme configuration.
-- **v1.0.0** (January 2026) — Initial release with individual stock analysis, multi-stock comparison, and statistical metrics.
-
----
-
-**Last Updated**: June 2026
+Educational tool only, not financial advice. Past performance does not predict future results. Consult a licensed professional before investing.

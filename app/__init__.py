@@ -1,1 +1,1 @@
-"""B3 Stocks Dashboard application package."""
+"""B3 dashboard package."""

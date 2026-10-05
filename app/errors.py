@@ -1,4 +1,4 @@
-"""Friendly error handling helpers for the Streamlit UI."""
+"""Error helpers for UI."""
 
 from __future__ import annotations
 
@@ -11,21 +11,19 @@ import streamlit as st
 
 logger = logging.getLogger(__name__)
 
-F = TypeVar("F", bound=Callable[..., Any])
+F = TypeVar('F', bound=Callable[..., Any])
 
 
 def show_data_error(context: str, exc: Exception) -> None:
-    """Log and display a non-fatal error related to data loading."""
-    logger.exception("Data error in %s", context)
-    st.error(
-        f"Could not load data for {context}. Please check your connection and try again later."
-    )
-    with st.expander("Error details"):
+    """Log and show friendly load error."""
+    logger.exception('Data error in %s', context)
+    st.error(f'Could not load data for {context}. Please check connection and retry.')
+    with st.expander('Error details'):
         st.exception(exc)
 
 
 def handle_data_errors(context: str) -> Callable[[F], F]:
-    """Decorator that wraps a data-loading function with friendly error UI."""
+    """Wrap loader with friendly error UI."""
 
     def decorator(func: F) -> F:
         @wraps(func)

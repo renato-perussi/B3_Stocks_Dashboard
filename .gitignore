@@ -1,13 +1,60 @@
-# Byte-compiled / optimized / DLL files
+# Python bytecode
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+
+# Distributions
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+wheels/
 
 # Virtual environments
+.venv/
 venv/
 env/
 ENV/
-.venv
+.env/
+.conda/
+
+# Pytest
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.cover
+nosetests.xml
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Env files
+.env
+.env.*
+!.env.example
+*.env
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
 
 # IDE
 .vscode/
@@ -15,27 +62,26 @@ ENV/
 *.swp
 *.swo
 *~
+*.sublime-project
+*.sublime-workspace
 
-# Environment variables
-.env
-.env.local
-
-# Data files
-data/raw/
-data/processed/
-
-# Logs
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Project specific
+# Project data
 *.csv
 *.xlsx
+*.xls
 *.json
+data/*.csv
+data/raw/
+data/processed/
 
 # Cache
 .cache/
 *.cache
+.parquet/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Coverage
+.coverage*

@@ -1,4 +1,4 @@
-"""Domain models used across analytics and UI layers."""
+"""Domain models for analytics and UI."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import pandas as pd
 
 @dataclass(frozen=True)
 class TickerInfo:
-    """Real-time quote and fundamental company information."""
+    """Quote and company profile."""
 
     ticker: str
     last_price: float
@@ -27,7 +27,7 @@ class TickerInfo:
 
 @dataclass(frozen=True)
 class StockStatistics:
-    """Statistical metrics computed from a single stock's price history."""
+    """Per-period stats for one stock."""
 
     volatility: float
     cumulative_return: float
@@ -41,7 +41,7 @@ class StockStatistics:
 
 @dataclass(frozen=True)
 class ComparisonResult:
-    """Bundle of all dataframes produced for a multi-stock comparison."""
+    """All frames for multi-stock view."""
 
     close_prices: pd.DataFrame
     returns: pd.DataFrame

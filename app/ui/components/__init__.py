@@ -1,1 +1,1 @@
-"""Reusable Streamlit UI components."""
+"""Reusable UI components."""

@@ -1,4 +1,4 @@
-"""Single-stock view: top header, controls (with About), statistics, chart."""
+"""Single stock view."""
 
 from __future__ import annotations
 
@@ -16,33 +16,31 @@ from app.ui.components.statistics_panel import render_statistics
 from app.ui.components.ticker_metrics_row import render_ticker_metrics
 
 
-@handle_data_errors("single stock view")
+@handle_data_errors('single stock view')
 def render_single_stock_view() -> None:
-    """Render the single ticker analysis tab."""
+    """Show one ticker analysis."""
     left_col, right_col = st.columns([0.25, 0.75])
-
     with left_col:
         period, ticker, info = _render_controls()
         history = fetch_history(ticker, period)
         stats = calculate_statistics(history)
         render_statistics(stats)
-
     with right_col:
         render_ticker_metrics(info)
         render_price_chart(history)
 
 
 def _render_controls() -> tuple[str, str, TickerInfo]:
-    """Render the controls container with the About popover and return selections."""
-    with st.container(border=True, width="stretch", height="content"):
+    """Show picks and return them."""
+    with st.container(border=True, width='stretch', height='content'):
         period = st.pills(
-            "Period",
+            'Period',
             options=PERIODS,
-            selection_mode="single",
+            selection_mode='single',
             default=DEFAULT_PERIOD,
-            key="single_period",
+            key='single_period',
         )
-        ticker = st.selectbox("Stock Ticker", options=STOCKS)
+        ticker = st.selectbox('Stock Ticker', options=STOCKS)
         info = fetch_ticker_info(ticker)
         render_about(info)
     return period or DEFAULT_PERIOD, ticker, info

@@ -1,4 +1,4 @@
-"""Correlation heatmap visualization using seaborn."""
+"""Correlation heatmap view."""
 
 from __future__ import annotations
 
@@ -11,11 +11,10 @@ from app.constants import CHART_HEIGHT_COMPARISON
 
 
 def render_correlation_heatmap(correlation_matrix: pd.DataFrame) -> None:
-    """Render a seaborn heatmap of the pairwise correlation matrix."""
-    with st.container(border=True, height=CHART_HEIGHT_COMPARISON, width="stretch"):
-        st.markdown("### Correlation Heatmap")
-
+    """Show pairwise correlation heatmap."""
+    with st.container(border=True, height=CHART_HEIGHT_COMPARISON, width='stretch'):
+        st.markdown('### Correlation Heatmap')
         figure = plt.figure(figsize=(12, 6.5))
-        heatmap(correlation_matrix, annot=True, cmap="Blues", vmin=-1, vmax=1)
-        st.pyplot(figure, width="stretch")
+        heatmap(correlation_matrix, annot=True, cmap='Blues', vmin=-1, vmax=1)
+        st.pyplot(figure, width='stretch')
         plt.close(figure)
