@@ -32,6 +32,7 @@ def test_show_data_error_renders(monkeypatch) -> None:
     """Error helper calls streamlit."""
     import contextlib
 
+    monkeypatch.setenv('APP_ENV', 'dev')
     seen: dict[str, object] = {}
     monkeypatch.setattr(errors.st, 'error', lambda m: seen.setdefault('error', m))
     monkeypatch.setattr(errors.st, 'exception', lambda e: seen.setdefault('exc', e))
@@ -39,9 +40,35 @@ def test_show_data_error_renders(monkeypatch) -> None:
     @contextlib.contextmanager
     def _expander(label: str):
         """Fake expander."""
+        seen.setdefault('expander', label)
         yield None
 
     monkeypatch.setattr(errors.st, 'expander', _expander)
     errors.show_data_error('ctx', ValueError('x'))
     assert 'error' in seen
     assert 'exc' in seen
+    assert 'Could not load data' in str(seen['error'])
+    assert seen['expander'] == 'Error details'
+
+
+def test_show_data_error_prod_oculta_exception(monkeypatch) -> None:
+    """Hide traceback in production."""
+    import contextlib
+
+    monkeypatch.setenv('APP_ENV', 'production')
+    seen: dict[str, object] = {}
+    monkeypatch.setattr(errors.st, 'error', lambda m: seen.setdefault('error', m))
+    monkeypatch.setattr(errors.st, 'exception', lambda e: seen.setdefault('exc', e))
+
+    @contextlib.contextmanager
+    def _expander(label: str):
+        """Fake expander (not called in prod)."""
+        seen.setdefault('expander', label)
+        yield None
+
+    monkeypatch.setattr(errors.st, 'expander', _expander)
+    errors.show_data_error('ctx', ValueError('x'))
+    assert 'error' in seen
+    assert 'exc' not in seen
+    assert 'expander' not in seen
+    assert 'Could not load data' in str(seen['error'])

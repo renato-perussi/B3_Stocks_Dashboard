@@ -32,9 +32,11 @@ def render_comparison_view() -> None:
 @handle_data_errors('multi-stock comparison')
 def _build_comparison(period: str, tickers: list[str]) -> ComparisonResult | None:
     """Fetch data and build result."""
+    import pandas as pd
+
     close_prices = fetch_close_prices(period, tickers)
-    if close_prices.empty:
-        st.warning('No data available for the selected tickers and period.')
+    if close_prices is None or not isinstance(close_prices, pd.DataFrame) or close_prices.empty:
+        st.warning('Yahoo data temporarily unavailable. Try another period.')
         return None
     returns = comparison.calculate_returns(close_prices)
     return ComparisonResult(

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import pandas as pd
 
@@ -24,10 +25,51 @@ class TickerInfo:
     sector: str
     industry: str
 
+    @classmethod
+    def from_raw(cls, ticker: str, raw: dict[str, Any]) -> TickerInfo:
+        """Build TickerInfo from partial dict."""
+
+        def _num(key: str, default: float) -> float:
+            """Parse float or default."""
+            try:
+                value = raw.get(key, default)
+                if value is None:
+                    return default
+                parsed = float(value)
+                if parsed != parsed or parsed in (float('inf'), float('-inf')):
+                    return default
+                return parsed
+            except (TypeError, ValueError, OverflowError):
+                return default
+
+        def _str(key: str, default: str = '') -> str:
+            value = raw.get(key, default)
+            return str(value) if value is not None else default
+
+        last = _num('last_price', float('nan'))
+        previous = _num('previous_close', float('nan'))
+        if last != last or previous != previous:  # Require valid price.
+            raise ValueError(f'Incomplete quote data for {ticker}.')
+        pct = 0.0 if previous == 0 else (last / previous - 1) * 100
+        return cls(
+            ticker=ticker,
+            last_price=round(last, 2),
+            previous_close=round(previous, 2),
+            pct_today=float(_num('pct_today', pct)),
+            open_price=round(_num('open_price', last), 2),
+            day_high=round(_num('day_high', last), 2),
+            day_low=round(_num('day_low', last), 2),
+            long_name=_str('long_name', ticker),
+            summary=_str('summary'),
+            web_site=_str('web_site'),
+            sector=_str('sector'),
+            industry=_str('industry'),
+        )
+
 
 @dataclass(frozen=True)
 class StockStatistics:
-    """Per-period stats for one stock."""
+    """Period stats for one stock."""
 
     volatility: float
     cumulative_return: float
@@ -41,7 +83,7 @@ class StockStatistics:
 
 @dataclass(frozen=True)
 class ComparisonResult:
-    """All frames for multi-stock view."""
+    """Frames for multi-stock view."""
 
     close_prices: pd.DataFrame
     returns: pd.DataFrame

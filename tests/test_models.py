@@ -62,3 +62,38 @@ def test_comparison_result_bundles_frames() -> None:
     )
     assert result.close_prices.equals(frame)
     assert result.correlation_matrix.equals(frame)
+
+
+def test_from_raw_none_pct_uses_computed() -> None:
+    """None pct_today uses computed value."""
+    raw = {
+        'last_price': 11.0,
+        'previous_close': 10.0,
+        'pct_today': None,
+        'open_price': 10.1,
+        'day_high': 10.5,
+        'day_low': 9.9,
+    }
+    info = TickerInfo.from_raw('PETR4.SA', raw)
+    assert info.pct_today == (11.0 / 10.0 - 1) * 100
+
+
+def test_from_raw_rejects_inf() -> None:
+    """Inf/None use defaults; inf last raises."""
+    raw_inf_pct = {
+        'last_price': 11.0,
+        'previous_close': 10.0,
+        'pct_today': float('inf'),
+        'open_price': 10.1,
+        'day_high': 10.5,
+        'day_low': 9.9,
+    }
+    info = TickerInfo.from_raw('PETR4.SA', raw_inf_pct)
+    # Inf pct falls back to computed value.
+    assert info.pct_today == (11.0 / 10.0 - 1) * 100
+    raw_inf_last = {'last_price': float('inf'), 'previous_close': 10.0}
+    try:
+        TickerInfo.from_raw('PETR4.SA', raw_inf_last)
+        raise AssertionError('should raise ValueError for inf last')
+    except ValueError:
+        pass

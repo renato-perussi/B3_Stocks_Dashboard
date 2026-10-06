@@ -1,7 +1,8 @@
-"""Single stock view."""
+"""Single-stock view."""
 
 from __future__ import annotations
 
+import pandas as pd
 import streamlit as st
 
 from app.analytics.statistics import calculate_statistics
@@ -18,20 +19,35 @@ from app.ui.components.ticker_metrics_row import render_ticker_metrics
 
 @handle_data_errors('single stock view')
 def render_single_stock_view() -> None:
-    """Show one ticker analysis."""
+    """Show single-ticker analysis."""
     left_col, right_col = st.columns([0.25, 0.75])
     with left_col:
         period, ticker, info = _render_controls()
-        history = fetch_history(ticker, period)
+        if info is None:
+            st.warning('Yahoo data temporarily unavailable. Try another ticker or period.')
+            return
+        try:
+            history = fetch_history(ticker, period)
+        except Exception:
+            history = None
+        if history is None or not isinstance(history, pd.DataFrame) or history.empty:
+            st.warning('Yahoo data temporarily unavailable. Try another period.')
+            return
         stats = calculate_statistics(history)
         render_statistics(stats)
     with right_col:
+        if info is None:
+            st.warning('Yahoo data temporarily unavailable. Try another ticker or period.')
+            return
+        if history is None or not isinstance(history, pd.DataFrame) or history.empty:
+            st.warning('Yahoo data temporarily unavailable. Try another period.')
+            return
         render_ticker_metrics(info)
         render_price_chart(history)
 
 
-def _render_controls() -> tuple[str, str, TickerInfo]:
-    """Show picks and return them."""
+def _render_controls() -> tuple[str, str, TickerInfo | None]:
+    """Show selectors and return picks."""
     with st.container(border=True, width='stretch', height='content'):
         period = st.pills(
             'Period',
@@ -41,6 +57,13 @@ def _render_controls() -> tuple[str, str, TickerInfo]:
             key='single_period',
         )
         ticker = st.selectbox('Stock Ticker', options=STOCKS)
-        info = fetch_ticker_info(ticker)
-        render_about(info)
+        info: TickerInfo | None
+        try:
+            info = fetch_ticker_info(ticker)
+        except Exception:
+            info = None
+        if info is not None:
+            render_about(info)
+        else:
+            st.warning('Yahoo data temporarily unavailable. Please retry shortly.')
     return period or DEFAULT_PERIOD, ticker, info

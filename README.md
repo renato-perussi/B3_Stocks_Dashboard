@@ -162,7 +162,7 @@ Tests use real logic with mocked yfinance. Analytics and formatters have full un
 
 ## Caching and Performance
 
-`fetch_history` and `fetch_close_prices` use session cache. `fetch_ticker_info` uses 5 minute TTL. Analytics avoids N+1 work with vectorized pandas. Charts use fixed heights from constants.
+`fetch_history` and `fetch_close_prices` use 1 hour cache (3600s, double-cache with Stooq fallback). `fetch_ticker_info` uses 30 minute TTL (1800s). Analytics avoids N+1 work with vectorized pandas. Charts use fixed heights from constants.
 
 Clear cache with:
 
@@ -175,9 +175,9 @@ streamlit cache clear
 | Issue | Fix |
 | ----- | --- |
 | Select at least two stocks | Pick 2+ tickers in multiselect. |
-| Could not load data banner | Check connection, open Error details. |
+| Could not load data banner | Check connection, open Error details (dev only). |
 | Empty chart | Try another period or ticker. |
-| Stale quote | Wait 5 minutes or clear cache. |
+| Stale quote | Wait 30 minutes or clear cache. |
 | Logo missing | Verify `docs/screenshots/B3_Logo.png` exists. |
 | Slow first load | First fetch downloads history, later hits cache. |
 | Ticker not found | Use `.SA` suffix, example `PETR4.SA`. |
